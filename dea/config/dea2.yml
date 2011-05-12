@@ -37,4 +37,10 @@ runtimes:
     version: 1.6.0
     version_flag: '-version'
     environment:
+  maglev:
+    executable: /home/maglev/Maglev/maglev/bin/maglev-ruby
+    version: 0.8
+    version_flag: '-MmaglevVersion'
+    environment:
+
 
