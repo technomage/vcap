@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+
+exec(File.expand_path("../../../services/maglev/bin/maglev_node", __FILE__), *ARGV)
