@@ -18,6 +18,15 @@ runtimes:
        rails_env: "production"
        bundle_gemfile:
        rack_env: "production"
+  - "maglev":
+      version: "0.8"
+      description: "MagLev"
+      executable: "/home/maglev/Maglev/maglev/bin/maglev-ruby"
+      environment:
+       rails_env: "production"
+       bundle_gemfile:
+       rack_env: "production"
+       maglev_home: "/home/maglev/Maglev/maglev"
 app_servers:
   - "thin":
       description: "Thin"

@@ -42,16 +42,20 @@ additional instructions for this environment have been included.
 Detailed Install/Run Instructions:
 ----------------------------------
 
-There are two methods for installing VCAP.  One is a manual process, which you
-might choose to do if you want to understand the details of what goes into
-a bringing up a VCAP instance. The other is an automated process contributed
-by the community. In both cases, you need to start with a stock Ubuntu
-server VM.
+The following instructions have been modified for MagLev by:
+1. Deleting the reference to the Automated Setup
+2. Replacing the vcap and vcap GitHub repositories with MagLev forks
+3. Changing the instructions to switch to the proper MagLev branches
+4. Added instructions on installing MagLev into the micro instance.
 
 ### Step 1: create a pristine VM with ssh
 
 * setup a VM with a pristine Ubuntu 10.04.2 server 64bit image,
   [download here](http://www.ubuntu.com/download/ubuntu/download)
+
+* If using maglev, when you install, make the user "maglev" (some of the default config
+  assumes ~maglev/cloudfoundry/... etc.).
+
 * you may wish to snapshot your VM now in case things go pear shaped.
 * great snapshot spots are here and after step 4
 * to enable remote access (more fun than using the console), install ssh.
@@ -60,7 +64,20 @@ To install ssh:
 
     sudo apt-get install openssh-server
 
+### step 1b: install MagLev
+
+Install MagLev:
+
+    cd ~
+    mkdir Maglev
+    cd Maglev
+    curl -O http://maglev.gemstone.com/files/MagLev-installer.zip
+    unzip MagLev-installer.zip
+    ./installMaglev.sh 25838
+    ln -s MagLev-25838.Linux-x86_64 maglev
+
 #### Step 2: run the automated setup process
+
 Run the install script. It'll ask for your sudo password at the
 beginning and towards the end. The entire process takes ~1 hour, so just
 keep a loose eye on it.
@@ -124,6 +141,19 @@ will need to modify the target to include it here, like `api.vcap.me:8080`.
 #### To see what else you can do try:
     vmc help
 
+Testing MagLev setup
+--------------------
+
+To test that you can run a Sinatra app under MagLev
+
+    cd ~
+    mkdir sinatra_hello
+    cd sinatra_hello
+    
+Create hello_app.rb:
+
+    
+
 Testing your setup
 ------------------
 
@@ -155,6 +185,15 @@ Cut and paste the following app into a ruby file (lets say env.rb):
 
     require 'rubygems'
     require 'sinatra'
+
+    # MagLev does not (yet) support Thin, the default Web Server for Ruby
+    # on CloudFoundry.  Instead of parsing the "-p NNNN" flag, we set the
+    # port via the environment variables in the following statement.
+    if defined? Maglev
+      set :run,     true
+      set :server,  'webrick'
+      set :port, ENV['VMC_APP_PORT']
+    end
 
     get '/' do
       host = ENV['VMC_APP_HOST']

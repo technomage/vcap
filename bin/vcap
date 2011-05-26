@@ -15,6 +15,7 @@
 # - redis
 # - mysql
 # - mongo
+# - maglev
 #
 
 require 'yaml'
@@ -381,7 +382,7 @@ module Run
   end
 
   def self.services
-    %w(redis mysql mongodb)
+    %w(redis mysql mongodb maglev)
   end
 
   def self.alias_args(args)

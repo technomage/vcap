@@ -69,8 +69,13 @@ class StagingPlugin
   end
 
   def self.get_ruby_version(exe)
-    get_ver  = %{-e "print RUBY_VERSION,'p',RUBY_PATCHLEVEL"}
-    `env -i PATH=#{ENV['PATH']} #{exe} #{get_ver}`
+    case exe
+    when /maglev/
+      `env -i PATH=#{ENV['PATH']} #{exe} -MmaglevVersion`
+    else
+      get_ver  = %{-e "print RUBY_VERSION,'p',RUBY_PATCHLEVEL"}
+      `env -i PATH=#{ENV['PATH']} #{exe} #{get_ver}`
+    end
   end
 
   # Checks the existence and version of the Ruby runtimes specified
@@ -149,7 +154,7 @@ class StagingPlugin
     # manifest directory, and it finds a framework.yml file, it will replace this.
     manifest_path = File.join(manifest_root, "#{framework}.yml")
     load_manifest(manifest_path)
-    Object.const_get("#{framework.camelize}Plugin")
+    Object.const_get("#{framework.capitalize}Plugin")
   end
 
   def self.load_manifest(path)

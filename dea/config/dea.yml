@@ -37,8 +37,11 @@ runtimes:
     version: 1.6.0
     version_flag: '-version'
     environment:
-  erlangR14B02:
-    executable: /var/vcap/runtimes/erlang-R14B02/bin/erl
-    version: ".* 5.8.3"
-    version_flag: '-version'
+  maglev:
+    executable: /home/maglev/Maglev/maglev/bin/maglev-ruby
+    version: 0.8
+    version_flag: '-MmaglevVersion'
     environment:
+
+
+

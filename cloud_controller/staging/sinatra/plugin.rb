@@ -1,3 +1,5 @@
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'runtime', 'runtime.rb'))
+
 class SinatraPlugin < StagingPlugin
   include GemfileSupport
   def framework
@@ -5,11 +7,32 @@ class SinatraPlugin < StagingPlugin
   end
 
   def stage_application
-    Dir.chdir(destination_directory) do
-      create_app_directories
-      copy_source_files
-      compile_gems
-      create_startup_script
+    begin
+      @runtime = RuntimeStaging.plugin_for(self)
+      Dir.chdir(destination_directory) do
+        # This is obviously the wrong place for this.  Some generic
+        # stage_application() should be calling:
+        #
+        #   @runtime.create_app_directories()
+        #   @framework.create_app_directories()
+        #   @app_server.create_app_directories()
+        #
+        #   @runtime.copy_source_files()
+        #   @framework.copy_source_files()
+        #   @app_server.copy_source_files()
+        #
+        #   ...
+        #
+        @runtime.check_staging_prerequisites
+
+        create_app_directories
+        copy_source_files
+        compile_gems
+        create_startup_script
+        @runtime.last_chance
+      end
+    ensure
+      @runtime = nil
     end
   end
 
@@ -17,6 +40,14 @@ class SinatraPlugin < StagingPlugin
   # TODO - Synthesize a 'config.ru' file for each app to avoid this.
   def start_command
     sinatra_main = detect_main_file
+
+    # The runtime: looks like:
+    #  {"version"=>"0.8", "description"=>"MagLev",
+    #   "executable"=>"/home/maglev/Maglev/maglev/bin/maglev-ruby",
+    #   "environment"=>{"rails_env"=>"production", "bundle_gemfile"=>nil,
+    #                   "rack_env"=>"production",
+    #                   "maglev_home"=>"/home/maglev/Maglev/maglev"}}
+
     if uses_bundler?
       "#{local_runtime} ./rubygems/ruby/#{library_version}/bin/bundle exec #{local_runtime} ./#{sinatra_main} $@"
     else
@@ -34,6 +65,9 @@ class SinatraPlugin < StagingPlugin
     else
       vars['RUBYOPT'] = "-rubygems -I$PWD/ruby -rstdsync"
     end
+
+    vars = vars.merge(@runtime.runtime_env_vars)
+
     # PWD here is after we change to the 'app' directory.
     generate_startup_script(vars) do
       plugin_specific_startup
